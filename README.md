@@ -1,181 +1,179 @@
-🚕 Ride Demand Forecasting and Driver Allocation
+# 🚕 Ride Demand Forecasting and Driver Allocation
 
-This project is a full-stack machine learning application that predicts hourly ride demand based on time and weather-related inputs.
-It provides clear demand insights through a clean UI, prediction summary, and interactive visualizations.
+This project is a **full-stack machine learning application** that predicts **hourly ride demand** based on time and weather-related inputs.  
+It provides clear demand insights through a **clean UI, prediction summary, and interactive visualizations**.
 
-The main goal of this project is to understand how ride-hailing platforms forecast demand and how such predictions can support better planning and decision-making.
+The main goal of this project is to understand how **ride-hailing platforms forecast demand** and how such predictions support **better planning and decision-making**.
 
-🌐 Live Demo
+---
 
-👉 Live Application
-https://<your-render-app-name>.onrender.com
+## 🌐 Live Demo
 
-(Deployed using Docker and Render)
+👉 **Live Application**  
+https://<your-render-app-name>.onrender.com  
 
-🖼️ Application UI Preview
-🔹 Input Form (Before Prediction)
+*(Deployed using Docker and Render)*
 
-🔹 Prediction Result with Summary & Visualization
+---
 
-The screenshots show the glassmorphism UI, input form, prediction summary, and hourly demand trend chart.
+## 🖼️ Application UI Preview
 
-🔍 What This Project Does
+### 🔹 Input Form (Before Prediction)
+![Input UI](screenshots/input-ui.png)
 
-Accepts time-based and weather-based inputs
+### 🔹 Prediction Result with Summary & Visualization
+![Output UI](screenshots/output-ui.png)
 
-Predicts hourly ride demand
+> The screenshots show the glassmorphism UI, input form, prediction summary, and hourly demand trend chart.
 
-Displays:
+---
 
-predicted demand (rides/hour)
+## 🔍 What This Project Does
 
-short explanation of the prediction
+- Accepts **time-based and weather-based inputs**
+- Predicts **hourly ride demand**
+- Displays:
+  - Predicted demand (rides/hour)
+  - Short explanation of the prediction
+  - Input summary
+  - 24-hour demand pattern chart
+- Handles invalid inputs with **friendly error messages**
 
-input summary
+---
 
-24-hour demand pattern chart
-
-Handles invalid inputs with friendly error messages
-
-🧠 Input Features
+## 🧠 Input Features
 
 The model uses the following inputs:
 
-Year
+- Year  
+- Month  
+- Day of Week  
+- Hour of Day  
+- Temperature (°C)  
+- Humidity (%)  
+- Wind Speed (km/h)  
+- Weather Condition (Clear, Cloudy, Rainy, Fog, Snow)
 
-Month
+These features were selected because **ride demand is highly influenced by time patterns and weather conditions**.
 
-Day of Week
+---
 
-Hour of Day
+## ⚙️ Tech Stack
 
-Temperature (°C)
+### Backend
+- Python
+- FastAPI
+- Scikit-learn
+- XGBoost
+- Pandas
+- NumPy
 
-Humidity (%)
+### Frontend
+- HTML (Jinja2 Templates)
+- Tailwind CSS
+- Chart.js
 
-Wind Speed (km/h)
+### DevOps
+- Docker
+- Render
+- GitHub
 
-Weather Condition (Clear, Cloudy, Rainy, Fog, Snow)
+---
 
-These features were selected because ride demand is highly influenced by time patterns and weather conditions.
+## 📊 Machine Learning Model
 
-⚙️ Tech Stack
-Backend
+- **Model:** XGBoost Regressor  
+- **Task:** Hourly ride demand prediction  
+- **Performance Metrics:**
+  - MAE
+  - RMSE
+  - R² Score (~86%)
 
-Python
+The model was trained on **simulated ride demand data** designed to reflect realistic daily and weather-based patterns.
 
-FastAPI
+---
 
-Scikit-learn
+## 📈 Output & Visualization
 
-XGBoost
+- Predicted ride demand (rides/hour)
+- Human-readable prediction explanation
+- Input summary for transparency
+- Interactive **24-hour demand trend chart**
 
-Pandas, NumPy
+This helps users clearly understand **how demand varies throughout the day**.
 
-Frontend
+---
 
-HTML (Jinja2 Templates)
-
-Tailwind CSS
-
-Chart.js
-
-DevOps
-
-Docker
-
-Render
-
-GitHub
-
-📊 Machine Learning Model
-
-Model: XGBoost Regressor
-
-Task: Hourly ride demand prediction
-
-Model Performance:
-
-MAE
-
-RMSE
-
-R² Score (~86%)
-
-The model was trained on simulated ride demand data designed to reflect realistic daily and weather-based patterns.
-
-📈 Output & Visualization
-
-Predicted ride demand (rides/hour)
-
-Human-readable prediction explanation
-
-Input summary for transparency
-
-Interactive 24-hour demand trend chart
-
-This helps users understand how demand varies throughout the day.
-
-🧩 Project Structure
+## 🧩 Project Structure
 
 Ride-Demand-Forecasting/
+│
 ├── app/
-│ ├── main.py
-│ ├── templates/
-│ │ └── index.html
-│ ├── services/
-│ │ ├── predictor.py
-│ │ ├── clustering.py
-│ │ └── allocation.py
+│   ├── main.py
+│   ├── templates/
+│   │   └── index.html
+│   └── services/
+│       ├── predictor.py
+│       ├── clustering.py
+│       └── allocation.py
+│
 ├── model/
-│ ├── demand_model.pkl
-│ ├── kmeans_model.pkl
-│ └── cluster_scaler.pkl
+│   ├── demand_model.pkl
+│   ├── kmeans_model.pkl
+│   └── cluster_scaler.pkl
+│
 ├── requirements.txt
 ├── Dockerfile
 ├── README.md
 └── screenshots/
 
-🚀 Run Locally (Without Docker)
+
+---
+
+## 2️⃣ Then your Run Locally heading will WORK
+
+## 🚀 Run Locally (Without Docker)
+
+### Build and install dependencies
 
 pip install -r requirements.txt
+Start the FastAPI server
+bash
+Copy code
 uvicorn app.main:app --reload
-
-Open in browser:
+Open in browser
+text
+Copy code
 http://127.0.0.1:8000
 
-🐳 Run Using Docker
-
+## 🐳 Run Using Docker
+Build the Docker image
+bash
+Copy code
 docker build -t ride-demand-app .
+Run the Docker container
+bash
+Copy code
 docker run -p 8000:8000 ride-demand-app
-
 ☁️ Deployment
-
 The application is containerized using Docker and deployed on Render, making it accessible as a public web service directly from GitHub.
 
-👤 About Me
-
+## 👤 About Me
 Name: Likhith Kumar
 Degree: B.Tech (Final Year)
 
-Interests:
-
+## 🎯 Interests
 Machine Learning
-
 Backend Development
-
 Data-Driven Systems
 
-GitHub:
-https://github.com/
-<your-username>
+## 🔗 Profiles
+GitHub: https://github.com/<your-username>
 
-LinkedIn:
-https://www.linkedin.com/in/
-<your-profile>
+LinkedIn: https://www.linkedin.com/in/<your-profile>
 
-🙌 Conclusion
+## 🙌 Conclusion
+This project demonstrates how a machine learning model can be integrated into a complete production-ready web application, covering prediction, visualization, containerization, and deployment.
 
-This project demonstrates how a machine learning model can be integrated into a complete web application, covering prediction, visualization, containerization, and deployment.
+It is designed to be simple, practical, and interview-ready, reflecting real-world system design.
 
-It is designed to be simple, practical, and interview-ready, reflecting real-world system design at a student level.
