@@ -24,8 +24,6 @@ https://<your-render-app-name>.onrender.com
 ### 🔹 Prediction Result with Summary & Visualization
 ![Output UI](screenshots/output-ui.png)
 
-> The screenshots show the glassmorphism UI, input form, prediction summary, and hourly demand trend chart.
-
 ---
 
 ## 🔍 What This Project Does
@@ -104,10 +102,10 @@ This helps users clearly understand **how demand varies throughout the day**.
 
 ---
 
-## 🧩 Project Structure
+## 🌿 Project Structure
 
+```text
 Ride-Demand-Forecasting/
-│
 ├── app/
 │   ├── main.py
 │   ├── templates/
@@ -116,19 +114,16 @@ Ride-Demand-Forecasting/
 │       ├── predictor.py
 │       ├── clustering.py
 │       └── allocation.py
-│
 ├── model/
 │   ├── demand_model.pkl
 │   ├── kmeans_model.pkl
 │   └── cluster_scaler.pkl
-│
 ├── requirements.txt
 ├── Dockerfile
 ├── README.md
 └── screenshots/
 
-
----
+```
 
 ## 2️⃣ Then your Run Locally heading will WORK
 
