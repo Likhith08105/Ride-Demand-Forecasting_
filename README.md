@@ -19,12 +19,12 @@ https://<your-render-app-name>.onrender.com
 ## 🖼️ Application UI Preview
 
 ### 🔹 Input Form (Before Prediction)
-<img width="1233" height="901" alt="Screenshot 2025-12-20 012004" src="https://github.com/user-attachments/assets/e8d0601a-5549-49ac-bcdb-98073ec4d8b8" />
+<img width="600" height="600" alt="Screenshot 2025-12-20 012004" src="https://github.com/user-attachments/assets/e8d0601a-5549-49ac-bcdb-98073ec4d8b8" />
 
 
 ### 🔹 Prediction Result with Summary & Visualization
-<img width="911" height="866" alt="image" src="https://github.com/user-attachments/assets/802c4a5c-5c33-475e-863b-6cbd5c6f5e7b" />
-<img width="1035" height="911" alt="image" src="https://github.com/user-attachments/assets/55f53966-6e57-49b0-a0f7-d06a9c570148" />
+<img width="600" height="600" alt="image" src="https://github.com/user-attachments/assets/802c4a5c-5c33-475e-863b-6cbd5c6f5e7b" />
+<img width="600" height="600" alt="image" src="https://github.com/user-attachments/assets/55f53966-6e57-49b0-a0f7-d06a9c570148" />
 
 
 
