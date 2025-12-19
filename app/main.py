@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -11,9 +10,8 @@ import random
 
 app = FastAPI()
 
-# Templates & static
+# Templates
 templates = Jinja2Templates(directory="app/templates")
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # In-memory prediction history
 prediction_history = []
