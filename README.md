@@ -104,6 +104,7 @@ This helps users understand **how demand varies throughout the day**.
 ---
 
 ## 🧩 Project Structure
+
 Ride-Demand-Forecasting/
 │
 ├── app/
@@ -147,3 +148,28 @@ docker run -p 8000:8000 ride-demand-app
 
 The application is containerized using Docker and deployed on Render, making it accessible as a public web service directly from GitHub.
 
+## 👤 About Me
+
+Name: Likhith Kumar
+Degree: B.Tech (Final Year)
+Interests:
+
+Machine Learning
+
+Backend Development
+
+Data-Driven Systems
+
+GitHub:
+https://github.com/
+<your-username>
+
+LinkedIn:
+https://www.linkedin.com/in/
+<your-profile>
+
+## 🙌 Conclusion
+
+This project demonstrates how a machine learning model can be integrated into a complete web application, covering prediction, visualization, containerization, and deployment.
+
+It is designed to be simple, practical, and interview-ready, reflecting real-world system design at a student level.
