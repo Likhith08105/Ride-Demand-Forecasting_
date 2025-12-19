@@ -131,27 +131,26 @@ Ride-Demand-Forecasting/
 
 ### Build and install dependencies
 
-pip install -r requirements.txt
-Start the FastAPI server
-bash
-Copy code
-uvicorn app.main:app --reload
-Open in browser
-text
-Copy code
-http://127.0.0.1:8000
+pip install -r requirements.txt<br>
+Start the FastAPI server<br>
+bash<br>
+Copy code<br>
+uvicorn app.main:app --reload<br>
+Open in browser<br>
+text<br>
+Copy code<br>
+http://127.0.0.1:8000<br>
 
 ## 🐳 Run Using Docker
-Build the Docker image
-bash
-Copy code
-docker build -t ride-demand-app .
-Run the Docker container
-bash
-Copy code
-docker run -p 8000:8000 ride-demand-app
-☁️ Deployment
-The application is containerized using Docker and deployed on Render, making it accessible as a public web service directly from GitHub.
+Build the Docker image<br>
+bash<br>
+Copy code<br>
+docker build -t ride-demand-app .<br>
+Run the Docker container<br>
+bash<br>
+Copy code<br>
+docker run -p 8000:8000 ride-demand-app<br>
+
 
 ## 👤 About Me
 
