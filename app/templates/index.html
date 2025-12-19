@@ -116,21 +116,35 @@
                 <div id="error-message" class="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500 text-red-300 font-semibold hidden"></div>
 
                 <form id="predictionForm" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <input type="number" id="year" placeholder="Year" class="white-input" required>
                     <input type="number" id="month" placeholder="Month (1–12)" class="white-input" min="1" max="12" required>
-                    <input type="number" id="day_of_week" placeholder="Day of Week (0=Mon)" class="white-input" min="0" max="6" required>
                     <input type="number" id="hour" placeholder="Hour (0–23)" class="white-input" min="0" max="23" required>
                     <input type="number" id="temperature" placeholder="Temperature (°C)" class="white-input" step="0.1" required>
-                    <input type="number" id="humidity" placeholder="Humidity (%)" class="white-input" step="0.1" min="0" max="100" required>
-                    <input type="number" id="wind_speed" placeholder="Wind Speed (km/h)" class="white-input" step="0.1" required>
+
+                    <select id="day_type" class="white-input" required>
+                        <option value="">Day Type</option>
+                        <option value="Weekday">Weekday</option>
+                        <option value="Weekend">Weekend</option>
+                    </select>
 
                     <select id="weather_condition" class="white-input" required>
                         <option value="">Weather Condition</option>
                         <option value="Clear">Clear</option>
                         <option value="Cloudy">Cloudy</option>
                         <option value="Rainy">Rainy</option>
-                        <option value="Fog">Fog</option>
-                        <option value="Snow">Snow</option>
+                    </select>
+
+                    <select id="location_zone" class="white-input" required>
+                        <option value="">Location Zone</option>
+                        <option value="Central">Central</option>
+                        <option value="Suburb">Suburb</option>
+                        <option value="IT Park">IT Park</option>
+                        <option value="Airport">Airport</option>
+                        <option value="Mall">Mall</option>
+                        <option value="University">University</option>
+                        <option value="Hospital">Hospital</option>
+                        <option value="Stadium">Stadium</option>
+                        <option value="Industrial">Industrial</option>
+                        <option value="Residential">Residential</option>
                     </select>
 
                     <button type="submit" class="col-span-1 md:col-span-2 bg-sky-500 hover:bg-sky-400 text-white py-3 rounded-xl text-lg cursor-pointer transition">
@@ -183,14 +197,12 @@
             e.preventDefault();
             
             const formData = {
-                year: parseInt(document.getElementById('year').value),
                 month: parseInt(document.getElementById('month').value),
-                day_of_week: parseInt(document.getElementById('day_of_week').value),
                 hour: parseInt(document.getElementById('hour').value),
                 temperature: parseFloat(document.getElementById('temperature').value),
-                humidity: parseFloat(document.getElementById('humidity').value),
-                wind_speed: parseFloat(document.getElementById('wind_speed').value),
-                weather_condition: document.getElementById('weather_condition').value
+                day_type: document.getElementById('day_type').value,
+                weather_condition: document.getElementById('weather_condition').value,
+                location_zone: document.getElementById('location_zone').value
             };
 
             try {

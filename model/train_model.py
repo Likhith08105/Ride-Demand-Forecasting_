@@ -9,19 +9,26 @@ from xgboost import XGBRegressor
 # Load dataset
 data = pd.read_csv("data/ride_data.csv")
 
+
+# Encode categorical features
+data["day_type"] = data["day_type"].map({"Weekday": 0, "Weekend": 1})
+data["weather_condition"] = data["weather_condition"].map({"Clear": 0, "Cloudy": 1, "Rainy": 2})
+location_zone_map = {zone: i for i, zone in enumerate(data["location_zone"].unique())}
+data["location_zone"] = data["location_zone"].map(location_zone_map)
+
+# Drop rows with NaN lag features
+data = data.dropna(subset=["lag_1", "lag_24"])
+
 # Features used for prediction
 feature_cols = [
-    "year",
     "month",
-    "day_of_week",
     "hour",
+    "day_type",
+    "weather_condition",
     "temperature",
-    "humidity",
-    "wind_speed",
-    "weather_encoded",
-    "latitude",
-    "longitude",
-    "distance_km"
+    "location_zone",
+    "lag_1",
+    "lag_24"
 ]
 
 X = data[feature_cols]

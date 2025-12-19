@@ -1,19 +1,16 @@
 from pydantic import BaseModel
 
+
 class PredictionInput(BaseModel):
-    year: int
     month: int
-    day_of_week: int
     hour: int
+    day_type: str  # "Weekday" or "Weekend"
+    weather_condition: str  # "Clear", "Cloudy", "Rainy"
     temperature: float
-    humidity: float
-    wind_speed: float
-    weather_encoded: int
-    latitude: float
-    longitude: float
-    distance_km: float
+    location_zone: str  # e.g. "Central", "Suburb", etc.
+
 
 
 class PredictionResponse(BaseModel):
     predicted_demand: float
-    zone_type: str
+    location_zone: str

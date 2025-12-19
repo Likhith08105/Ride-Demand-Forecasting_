@@ -26,15 +26,14 @@ WEATHER_MAP = {
     "Snow": 2
 }
 
+
 class PredictionRequest(BaseModel):
-    year: int
     month: int
-    day_of_week: int
     hour: int
+    day_type: str  # "Weekday" or "Weekend"
+    weather_condition: str  # "Clear", "Cloudy", "Rainy"
     temperature: float
-    humidity: float
-    wind_speed: float
-    weather_condition: str
+    location_zone: str  # e.g. "Central", "Suburb", etc.
 
 @app.get("/")
 def home(request: Request):
@@ -43,66 +42,105 @@ def home(request: Request):
         {"request": request}
     )
 
+
 @app.post("/predict")
 def predict(data: PredictionRequest):
     try:
         weather_encoded = WEATHER_MAP.get(data.weather_condition, 0)
 
+        # Lag features: use previous predictions if available, else mean value
+        lag_1 = prediction_history[0]["prediction"] if prediction_history else 30.0
+        lag_24 = prediction_history[23]["prediction"] if len(prediction_history) > 23 else 30.0
+
+
+        # Location zone mapping (must match training)
+        zone_map = {
+            "Central": 0,
+            "Suburb": 1,
+            "IT Park": 2,
+            "Airport": 3,
+            "Mall": 4,
+            "University": 5,
+            "Hospital": 6,
+            "Stadium": 7,
+            "Industrial": 8,
+            "Residential": 9
+        }
+        zone_encoded = zone_map.get(data.location_zone, 0)
+
         features = {
-            "year": data.year,
             "month": data.month,
-            "day_of_week": data.day_of_week,
             "hour": data.hour,
+            "day_type": 0 if data.day_type == "Weekday" else 1,
+            "weather_condition": weather_encoded,
             "temperature": data.temperature,
-            "humidity": data.humidity,
-            "wind_speed": data.wind_speed,
-            "weather_encoded": weather_encoded,
-            "latitude": 17.45,
-            "longitude": 78.48,
-            "distance_km": random.uniform(3, 12)
+            "location_zone": zone_encoded,
+            "lag_1": lag_1,
+            "lag_24": lag_24
         }
 
         # ML Prediction
         prediction = round(predict_demand(features), 2)
 
-        # Zone logic
-        zone = get_zone_type(
-            features["latitude"],
-            features["longitude"],
-            prediction
-        )
 
-        # Analysis text
-        prediction_analysis = (
-            f"The predicted demand is influenced by time, weather conditions, "
-            f"and day pattern. This area currently falls under a {zone.lower()}, "
-            f"indicating moderate to high ride activity."
-        )
+        # Dynamic, context-aware analysis
+        analysis_parts = []
+        # IT Park
+        if data.location_zone == "IT Park":
+            if data.day_type == "Weekend":
+                analysis_parts.append("Leisure and late-evening trips increase demand variability in IT Park on weekends.")
+            else:
+                analysis_parts.append("Office commute significantly drives demand peaks in IT Park on weekdays.")
+        # Airport
+        elif data.location_zone == "Airport":
+            if data.hour in range(5, 11):
+                analysis_parts.append("Morning flight schedules boost early demand at the Airport.")
+            elif data.hour in range(18, 23):
+                analysis_parts.append("Evening arrivals and departures create high demand at the Airport.")
+            else:
+                analysis_parts.append("Airport demand is steady due to continuous flight operations.")
+        # Central
+        elif data.location_zone == "Central":
+            if data.hour in range(8, 21):
+                analysis_parts.append("Central zone sees high activity during business and shopping hours.")
+            else:
+                analysis_parts.append("Late-night demand in Central is driven by nightlife and events.")
+        # Rainy weather
+        if data.weather_condition == "Rainy":
+            analysis_parts.append("Rainy weather typically increases ride demand as people avoid walking or biking.")
+        # Rush hour
+        if data.hour in range(8, 11) or data.hour in range(17, 21):
+            analysis_parts.append("This is a rush hour period, so demand is expected to spike.")
+        # Suburb on weekend
+        if data.location_zone == "Suburb" and data.day_type == "Weekend":
+            analysis_parts.append("Suburban leisure trips and family outings can increase weekend demand.")
+        # Mall on weekend
+        if data.location_zone == "Mall" and data.day_type == "Weekend":
+            analysis_parts.append("Weekend shopping and entertainment drive up demand near malls.")
+        # Default if nothing else
+        if not analysis_parts:
+            analysis_parts.append("Demand is shaped by the interplay of time, weather, and zone activity.")
+        prediction_analysis = " ".join(analysis_parts) + f" This area ({data.location_zone}) currently shows demand of {prediction}."
 
         # Input summary
         input_summary = {
-            "Year": data.year,
             "Month": data.month,
-            "Day of Week": data.day_of_week,
             "Hour": data.hour,
+            "Day Type": data.day_type,
             "Temperature (°C)": data.temperature,
-            "Humidity (%)": data.humidity,
-            "Wind Speed (km/h)": data.wind_speed,
-            "Weather Condition": data.weather_condition
+            "Weather Condition": data.weather_condition,
+            "Location Zone": data.location_zone
         }
 
         # Chart data
         hour_labels = list(range(24))
-        hour_values = [
-            max(5, prediction + random.randint(-8, 8))
-            for _ in range(24)
-        ]
+        hour_values = [max(5, prediction + random.randint(-8, 8)) for _ in range(24)]
 
         # Save to history (in-memory)
         history_entry = {
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "prediction": prediction,
-            "zone": zone,
+            "zone": data.location_zone,
             "inputs": input_summary
         }
         prediction_history.insert(0, history_entry)
@@ -112,7 +150,7 @@ def predict(data: PredictionRequest):
         return {
             "success": True,
             "prediction": prediction,
-            "zone": zone,
+            "zone": data.location_zone,
             "analysis": prediction_analysis,
             "input_summary": input_summary,
             "hour_labels": hour_labels,
