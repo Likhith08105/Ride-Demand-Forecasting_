@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ride Demand Forecasting</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: #f9fafb;
+            background: radial-gradient(circle at top left, #4c1d95 0, transparent 60%),
+                        radial-gradient(circle at top right, #022c22 0, transparent 55%),
+                        radial-gradient(circle at bottom, #1d4ed8 0, #020617 55%);
+            overflow-x: hidden;
+        }
+
+        .aurora-layer {
+            position: fixed;
+            inset: -20%;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse at 10% 20%, rgba(56, 189, 248, 0.45), transparent 55%),
+                radial-gradient(ellipse at 80% 0%, rgba(236, 72, 153, 0.4), transparent 55%),
+                radial-gradient(ellipse at 0% 80%, rgba(52, 211, 153, 0.35), transparent 55%);
+            mix-blend-mode: screen;
+            filter: blur(30px);
+            opacity: 0.75;
+            animation: auroraMove 16s ease-in-out infinite alternate;
+            z-index: -1;
+        }
+
+        @keyframes auroraMove {
+            0% { transform: translate3d(-20px, -10px, 0) scale(1.02); }
+            50% { transform: translate3d(20px, 10px, 0) scale(1.05); }
+            100% { transform: translate3d(-10px, 5px, 0) scale(1.03); }
+        }
+
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='noStitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+            mix-blend-mode: soft-light;
+            z-index: -1;
+        }
+
+        .glass {
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.18), rgba(15,23,42,0.55));
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-radius: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.9), 0 0 0 1px rgba(15, 23, 42, 0.9);
+        }
+
+        .white-input {
+            background: white;
+            border: 1px solid #d1d5db;
+            padding: 12px;
+            border-radius: 12px;
+            width: 100%;
+            color: #111827;
+            font-size: 16px;
+        }
+
+        .white-input::placeholder {
+            color: #6b7280;
+        }
+
+        .white-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+        }
+
+        #chart-container {
+            width: 100%;
+            height: 350px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="aurora-layer"></div>
+    <div class="noise-overlay"></div>
+
+    <div class="min-h-screen w-full flex flex-col items-center justify-start py-10 px-4 md:px-6 lg:px-10">
+
+        <header class="w-full max-w-5xl mb-8 text-center">
+            <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight drop-shadow-xl">
+                Ride Demand Forecasting
+                <span class="ml-1">🚕✨</span>
+            </h1>
+            <p class="mt-3 text-sm md:text-base text-slate-200/80">
+                Real-time prediction of hourly ride demand using weather and temporal features.
+            </p>
+        </header>
+
+        <!-- Top Section: Form + Prediction -->
+        <section class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+
+            <!-- Form Card -->
+            <div class="glass p-8 lg:col-span-2">
+                <h2 class="text-2xl font-semibold mb-6">Enter Input Details</h2>
+                
+                <div id="error-message" class="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500 text-red-300 font-semibold hidden"></div>
+
+                <form id="predictionForm" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <input type="number" id="year" placeholder="Year" class="white-input" required>
+                    <input type="number" id="month" placeholder="Month (1–12)" class="white-input" min="1" max="12" required>
+                    <input type="number" id="day_of_week" placeholder="Day of Week (0=Mon)" class="white-input" min="0" max="6" required>
+                    <input type="number" id="hour" placeholder="Hour (0–23)" class="white-input" min="0" max="23" required>
+                    <input type="number" id="temperature" placeholder="Temperature (°C)" class="white-input" step="0.1" required>
+                    <input type="number" id="humidity" placeholder="Humidity (%)" class="white-input" step="0.1" min="0" max="100" required>
+                    <input type="number" id="wind_speed" placeholder="Wind Speed (km/h)" class="white-input" step="0.1" required>
+
+                    <select id="weather_condition" class="white-input" required>
+                        <option value="">Weather Condition</option>
+                        <option value="Clear">Clear</option>
+                        <option value="Cloudy">Cloudy</option>
+                        <option value="Rainy">Rainy</option>
+                        <option value="Fog">Fog</option>
+                        <option value="Snow">Snow</option>
+                    </select>
+
+                    <button type="submit" class="col-span-1 md:col-span-2 bg-sky-500 hover:bg-sky-400 text-white py-3 rounded-xl text-lg cursor-pointer transition">
+                        Predict Demand
+                    </button>
+                </form>
+            </div>
+
+            <!-- Prediction Summary Card -->
+            <div class="glass p-6 md:p-7 flex flex-col gap-4">
+                <h2 class="text-xl font-semibold mb-1">Prediction Overview</h2>
+
+                <div id="predictionContent">
+                    <p class="text-sm text-slate-200/80">
+                        Fill in the details on the left and hit <span class="font-semibold">Predict Demand</span>
+                        to see the forecast and analysis here.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom Section: Output Visuals -->
+        <section id="outputSection" class="w-full max-w-5xl mt-8 mb-16 glass p-6 md:p-8 hidden">
+            <h2 class="text-xl md:text-2xl font-semibold mb-4 flex items-center gap-2">
+                <span>Output Visuals</span> <span>📊</span>
+            </h2>
+
+            <div id="outputContent" class="space-y-6"></div>
+        </section>
+
+        <!-- Prediction History Section -->
+        <section class="w-full max-w-5xl mt-8 mb-16 glass p-6 md:p-8">
+            <h2 class="text-xl md:text-2xl font-semibold mb-4 flex items-center gap-2">
+                <span>Recent Predictions</span> <span>📋</span>
+            </h2>
+
+            <div id="historyContent" class="space-y-3">
+                <p class="text-sm text-slate-200/80">No predictions made yet</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let demandChart = null;
+
+        // Load history on page load
+        window.addEventListener('load', loadHistory);
+
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                year: parseInt(document.getElementById('year').value),
+                month: parseInt(document.getElementById('month').value),
+                day_of_week: parseInt(document.getElementById('day_of_week').value),
+                hour: parseInt(document.getElementById('hour').value),
+                temperature: parseFloat(document.getElementById('temperature').value),
+                humidity: parseFloat(document.getElementById('humidity').value),
+                wind_speed: parseFloat(document.getElementById('wind_speed').value),
+                weather_condition: document.getElementById('weather_condition').value
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data);
+                    loadHistory();
+                    document.getElementById('error-message').classList.add('hidden');
+                } else {
+                    showError(data.error || 'Prediction failed');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        });
+
+        async function loadHistory() {
+            try {
+                const response = await fetch('/history');
+                const data = await response.json();
+                
+                if (data.success && data.history.length > 0) {
+                    displayHistory(data.history);
+                }
+            } catch (error) {
+                console.log('No history available');
+            }
+        }
+
+        function displayHistory(history) {
+            const historyDiv = document.getElementById('historyContent');
+            let historyHtml = '<div class="space-y-2">';
+            
+            history.forEach((entry, index) => {
+                historyHtml += `
+                    <div class="bg-slate-800/40 p-3 rounded-lg border border-slate-700/40">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-semibold text-sky-300">${entry.prediction} rides/hour</p>
+                                <p class="text-xs text-slate-300 mt-1">${entry.zone}</p>
+                                <p class="text-xs text-slate-400 mt-1">${entry.timestamp}</p>
+                            </div>
+                            <span class="text-xs bg-slate-700/60 px-2 py-1 rounded">#${index + 1}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            historyHtml += '</div>';
+            historyDiv.innerHTML = historyHtml;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            document.getElementById('outputSection').classList.add('hidden');
+        }
+
+        function displayResults(data) {
+            const predictionDiv = document.getElementById('predictionContent');
+            predictionDiv.innerHTML = `
+                <div>
+                    <p class="text-sm uppercase tracking-wide text-slate-300/80 mb-1">Predicted Demand</p>
+                    <p class="text-3xl font-bold">
+                        ${data.prediction}
+                        <span class="text-base font-medium text-slate-200/80">rides/hour</span>
+                    </p>
+                </div>
+                <div class="mt-3 text-sm leading-relaxed text-slate-100/90">
+                    <p class="font-semibold mb-1">Zone 📍</p>
+                    <p>${data.zone}</p>
+                </div>
+                <div class="mt-3 text-sm leading-relaxed text-slate-100/90">
+                    <p class="font-semibold mb-1">Analysis 🧠</p>
+                    <p>${data.analysis}</p>
+                </div>
+            `;
+
+            const outputDiv = document.getElementById('outputContent');
+            let summaryHtml = '<div class="space-y-6"><div>';
+            summaryHtml += '<p class="font-semibold text-lg mb-1">Predicted Ride Demand:</p>';
+            summaryHtml += `<p class="text-base md:text-lg"><span class="font-bold">${data.prediction}</span> rides/hour</p></div>`;
+            
+            summaryHtml += '<div><h3 class="text-lg font-semibold mb-2 flex items-center gap-2"><span>Input Summary</span> <span>📝</span></h3>';
+            summaryHtml += '<ul class="list-disc pl-5 space-y-1 text-sm md:text-base">';
+            for (const [key, value] of Object.entries(data.input_summary)) {
+                summaryHtml += `<li><span class="font-semibold">${key}:</span> ${value}</li>`;
+            }
+            summaryHtml += '</ul></div>';
+
+            summaryHtml += '<div><h3 class="text-lg font-semibold mb-3 flex items-center gap-2"><span>Demand Pattern Chart</span> <span>📈</span></h3>';
+            summaryHtml += '<div class="bg-slate-900/60 rounded-2xl p-4 border border-slate-700/60"><canvas id="demandChart"></canvas></div></div></div>';
+            
+            outputDiv.innerHTML = summaryHtml;
+            document.getElementById('outputSection').classList.remove('hidden');
+
+            setTimeout(() => {
+                createChart(data.hour_labels, data.hour_values);
+            }, 100);
+        }
+
+        function createChart(labels, values) {
+            const ctx = document.getElementById('demandChart');
+            if (!ctx) return;
+
+            if (demandChart) {
+                demandChart.destroy();
+            }
+
+            demandChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Avg Ride Demand per Hour',
+                        data: values,
+                        borderWidth: 3,
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        borderColor: 'rgba(56,189,248,0.95)',
+                        backgroundColor: 'rgba(56,189,248,0.18)',
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e5e7eb' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Hour of Day',
+                                color: '#cbd5f5'
+                            },
+                            ticks: { color: '#cbd5f5' },
+                            grid: { color: 'rgba(148,163,184,0.25)' }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Average Ride Count',
+                                color: '#cbd5f5'
+                            },
+                            beginAtZero: true,
+                            ticks: { color: '#cbd5f5' },
+                            grid: { color: 'rgba(148,163,184,0.25)' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
