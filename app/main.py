@@ -53,6 +53,7 @@ class PredictionRequest(BaseModel):
         return v
 
 class PredictionResponse(BaseModel):
+    success: bool = True
     predicted_demand: float
     location_zone: str
 
@@ -126,14 +127,14 @@ def predict(data: PredictionRequest = Body(...)):
         if len(prediction_history) > MAX_HISTORY:
             prediction_history.pop()
 
-        response = PredictionResponse(predicted_demand=prediction, location_zone=data.location_zone)
+        response = PredictionResponse(success=True, predicted_demand=prediction, location_zone=data.location_zone)
         return JSONResponse(content=jsonable_encoder(response))
 
     except Exception as e:
-        return {
+        return JSONResponse(content={
             "success": False,
             "error": str(e)
-        }
+        }, status_code=400)
 
 @app.get("/history")
 def get_history():
